@@ -1,0 +1,46 @@
+name: 'lh_nautical_dbt'
+version: '1.0.0'
+config-version: 2
+
+# IMPORTANTE: Esse nome deve ser o mesmo que está no seu ~/.dbt/profiles.yml
+profile: 'lh_nautical_dbt'
+
+# Caminhos das pastas estruturais do seu projeto
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+# Arquivos que serão limpos quando você rodar o comando 'dbt clean'
+clean-targets:
+  - "target"
+  - "dbt_packages"
+  - "logs"
+
+# ===================================================================
+# CONFIGURAÇÃO DOS MODELOS (Aplicando DRY e boas práticas Databricks)
+# ===================================================================
+models:
+  lh_nautical_dbt:
+    # Configuração Global para o Databricks: Tudo nasce como tabela Delta por padrão
+    +file_format: delta
+    
+    # Camada Staging (Seus dados limpos vindos da ingestão bronze)
+    # Directs all models inside the "staging" folder to the "silver" schema as views
+    staging:
+      +materialized: view
+      +schema: silver
+      
+    # Camada Intermediate (Seus modelos de regras de negócio confiáveis)
+    # Directs all models inside the "intermediate" folder to the "silver" schema as views
+    intermediate:
+      +materialized: view
+      +schema: silver
+      
+    # Camada Marts (Onde ficarão seus Fatos e Dimensões prontos para o negócio)
+    # Directs all models inside the "marts" folder to the "gold" schema as tables
+    marts:
+      +materialized: table
+      +schema: gold

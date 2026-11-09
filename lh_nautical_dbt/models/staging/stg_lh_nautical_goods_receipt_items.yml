@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: stg_lh_nautical_goods_receipt_items
+    description: "Modelo de staging corrigido mapeando apenas os atributos físicos reais do recebimento."
+    columns:
+      - name: goods_receipt_item_id
+        description: "Chave primária da linha do item recebido."
+        tests:
+          - unique
+          - not_null
+
+      - name: goods_receipt_id
+        description: "Chave estrangeira do cabeçalho da carga."
+        tests:
+          - not_null
+
+      - name: purchase_order_item_id
+        description: "Chave de amarração com a Ordem de Compra. É ela que usaremos no Mart para buscar o variant_id e os custos!"
+        tests:
+          - not_null
+
+      - name: quantity_received
+        description: "Volume físico que entrou no estoque."
+        tests:
+          - not_null
+
+      - name: ingestion_timestamp
+        description: "Carimbo de data/hora da ingestão."

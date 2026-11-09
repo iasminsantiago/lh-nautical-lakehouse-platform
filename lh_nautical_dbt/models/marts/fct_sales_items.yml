@@ -1,0 +1,138 @@
+version: 2
+
+models:
+  - name: fct_sales_items
+    description: "Modelo fato de vendas no nível de item de pedido, contendo chaves para o Star Schema, métricas brutas, descontos, notas fiscais ativas e o impacto real de devoluções."
+    columns:
+      # --- Primary & Foreign Surrogate Keys ---
+      - name: sales_item_sk
+        description: "Chave primária substituta (Surrogate Key) do item de venda (dbt_utils hash de order_item_id)."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: date_sk
+        description: "Chave estrangeira referente à data de emissão do pedido no formato numérico YYYYMMDD (aponta para dim_dates)."
+        data_tests:
+          - not_null
+
+      - name: customer_sk
+        description: "Chave estrangeira mapeando o cliente do pedido para dim_customers."
+        data_tests:
+          - not_null
+
+      - name: variant_sk
+        description: "Chave estrangeira mapeando a variante do produto vendida para dim_products."
+        data_tests:
+          - not_null
+
+      - name: location_sk
+        description: "Chave estrangeira mapeando o local/filial de venda para dim_location."
+        data_tests:
+          - not_null
+
+      - name: employee_sk
+        description: "Chave estrangeira mapeando o vendedor para dim_employee. Pode ser nula em vendas 100% online automatizadas."
+
+      # --- Natural Keys & Degenerate Dimensions ---
+      - name: order_item_id
+        description: "ID natural da linha do item do pedido no ERP."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "ID natural do pedido operacional."
+        data_tests:
+          - not_null
+
+      - name: order_number
+        description: "Número amigável/operacional do pedido de venda."
+
+      - name: customer_id
+        description: "ID natural do cliente no ERP."
+        data_tests:
+          - not_null
+
+      - name: product_variant_id
+        description: "ID natural da variante do produto no ERP."
+        data_tests:
+          - not_null
+
+      - name: location_id
+        description: "ID natural do local/filial no ERP."
+        data_tests:
+          - not_null
+
+      - name: employee_id
+        description: "ID natural do vendedor/colaborador responsável."
+
+      - name: channel
+        description: "Canal de vendas (ex: E-commerce, Physical Store, B2B)."
+
+      # --- Quantidades e Valores Brutos ---
+      - name: quantity
+        description: "Quantidade bruta de unidades vendidas na linha do item."
+        data_tests:
+          - not_null
+
+      - name: unit_price
+        description: "Preço de venda unitário original da variante."
+        data_tests:
+          - not_null
+
+      - name: gross_revenue
+        description: "Receita de tabela bruta (quantity * unit_price)."
+        data_tests:
+          - not_null
+
+      - name: discount_amount
+        description: "Valor monetário total de desconto aplicado à linha (gross_revenue - gross_sales_amount)."
+        data_tests:
+          - not_null
+
+      - name: gross_sales_amount
+        description: "Valor faturado bruto do item após descontos de linha (line_total)."
+        data_tests:
+          - not_null
+
+      # --- Devoluções / Reembolsos ---
+      - name: returned_quantity
+        description: "Quantidade de unidades devolvidas efetivamente pelo cliente (Exclui devoluções canceladas)."
+        data_tests:
+          - not_null
+
+      - name: refund_amount
+        description: "Valor monetário total reembolsado ao cliente devido a devoluções."
+        data_tests:
+          - not_null
+
+      # --- Métricas Líquidas Reais ---
+      - name: net_quantity
+        description: "Quantidade líquida final de produtos que permaneceram vendidos (quantity - returned_quantity)."
+        data_tests:
+          - not_null
+
+      - name: net_sales_amount
+        description: "Receita líquida real mantida pela empresa (gross_sales_amount - refund_amount)."
+        data_tests:
+          - not_null
+
+      # --- Dados Fiscais (NFe Ativa) ---
+      - name: nfe_number
+        description: "Número da nota fiscal (NFe) ativa associada ao pedido."
+
+      - name: nfe_series
+        description: "Série da nota fiscal ativa."
+
+      - name: invoice_status
+        description: "Status da nota fiscal associada."
+
+      - name: invoice_total_amount
+        description: "Valor bruto total da nota fiscal ativa associada ao pedido."
+
+      # --- Auditoria ---
+      - name: ingestion_timestamp
+        description: "Timestamp de auditoria indicando quando o registro foi ingerido na pipeline."
+        data_tests:
+          - not_null

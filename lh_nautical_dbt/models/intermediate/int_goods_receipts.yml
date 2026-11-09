@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: int_goods_receipts
+    description: "Intermediate: goods receipts aggregated with items for receipt-level metrics."
+    columns:
+      - name: goods_receipt_id
+        description: "Natural key of the goods receipt."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: purchase_order_id
+        description: "FK to the purchase order that originated the receipt."
+
+      - name: received_by_employee_id
+        description: "Employee who received the goods."
+
+      - name: received_at
+        description: "Datetime when goods were received."
+
+      - name: notes
+        description: "Sanitized operational notes regarding the receipt (sem_nota, conferido, necessita_revisao)."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['sem_nota', 'conferido', 'necessita_revisao']       
+
+      - name: total_items
+        description: "Count of receipt items."
+
+      - name: total_quantity_received
+        description: "Sum of quantities received for the receipt."
